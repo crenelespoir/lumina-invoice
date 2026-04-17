@@ -1,7 +1,8 @@
-// Sidebar de navigation du dashboard
+// Sidebar responsive — cachée sur mobile, visible sur desktop
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
@@ -11,6 +12,8 @@ import {
   Users,
   Settings,
   Zap,
+  Menu,
+  X,
 } from "lucide-react";
 
 const navLinks = [
@@ -22,12 +25,13 @@ const navLinks = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  return (
-    <aside className="w-64 bg-white border-r border-slate-100 flex flex-col fixed h-full z-40">
+  const NavContent = () => (
+    <>
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-slate-100">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
@@ -48,6 +52,7 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? "bg-blue-50 text-blue-700"
@@ -64,7 +69,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Profil utilisateur */}
+      {/* Profil */}
       <div className="p-4 border-t border-slate-100">
         <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 transition">
           <UserButton />
@@ -74,6 +79,50 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ===== DESKTOP SIDEBAR ===== */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-slate-100 flex-col fixed h-full z-40">
+        <NavContent />
+      </aside>
+
+      {/* ===== MOBILE HEADER ===== */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 h-14 flex items-center justify-between px-4">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+            <Zap className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="font-bold text-slate-900 text-sm">Lumina</span>
+          <span className="font-bold text-blue-600 text-sm">Invoice</span>
+        </Link>
+
+        {/* Bouton hamburger */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="p-2 rounded-lg hover:bg-slate-50 transition"
+        >
+          {mobileOpen ? (
+            <X className="w-5 h-5 text-slate-600" />
+          ) : (
+            <Menu className="w-5 h-5 text-slate-600" />
+          )}
+        </button>
+      </div>
+
+      {/* ===== MOBILE MENU ===== */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileOpen(false)}>
+          <aside
+            className="w-64 bg-white h-full flex flex-col shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <NavContent />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
